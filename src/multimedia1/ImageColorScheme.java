@@ -1,8 +1,17 @@
 package multimedia1;
 
+import java.awt.image.BufferedImage;
 import java.util.Arrays;
 
-public class ColorScheme {
+/**
+ * The matrix-vector multiplication should use floating point or double precision, 
+ * but the input RGB values are expected to be in the range of 0-255.  
+ * For instance, for the RGB to YUV conversion, you need to make sure the matrix and the input RGB are in floating point or double, 
+ * then apply the matrix multiplication and produce a YUV result in floating point precision. After you subsample/upsample as in the flow chart, 
+ * you can then apply the inverse matrix YUV to RGB on the YUV floating point or double precision values to obtain floating point RGB values. 
+ * But before display or saving,  you need to perform the RGB quantization and then convert back to bytes or unsigned char (C++).
+ */
+public class ImageColorScheme {
 
 	private static final double [][] RGB_TO_YUV_MATRIX = {{0.299, 0.587, 0.114}, {0.596, -0.274, -0.322}, {0.211, -0.523, 0.312}};
 	private static final double [][] YUV_TO_RGB_MATRIX = {{1.000, 0.956, 0.621}, {1.000, -0.272, -0.647}, {1.000, -1.106, 1.703}};
@@ -19,13 +28,16 @@ public class ColorScheme {
 	}
 	
 	private SCHEME_TYPE type;
-	private double [][] channels;
-	Matrix rgbToYuvMatrix;
-	Matrix yuvToRgbMatrix;
-	int bitsPerChannel;
-	Matrix channelsMatrix;
+	//TODO change to private
+	public double [][] channels;
+	private BufferedImage displayImage;
 	
-	ColorScheme(double [][] channels) {
+	private Matrix rgbToYuvMatrix;
+	private Matrix yuvToRgbMatrix;
+	private int bitsPerChannel;
+	private Matrix channelsMatrix;
+	
+	ImageColorScheme(double [][] channels, BufferedImage img) {
 		this.type = SCHEME_TYPE.RGB;
 		this.channels = channels;
 		
@@ -34,6 +46,7 @@ public class ColorScheme {
 		
 		this.bitsPerChannel = channels[0].length;
 		this.channelsMatrix = new Matrix(3, bitsPerChannel, this.channels);
+		this.displayImage = img;
 	}
 	
 	public double[] getY() {
@@ -83,10 +96,14 @@ public class ColorScheme {
 		this.channels = this.channelsMatrix.getMatrix();
 		this.type = targetType;
 	}
+
+	public BufferedImage getDisplayImage() {
+		return displayImage;
+	}
 	
 	public static void main(String[] args) {
 		double [][] channels = {{0.299, 0.587, 0.114}, {0.596, -0.274, -0.322}, {0.211, -0.523, 0.312}};
-		ColorScheme sc = new ColorScheme(channels);
+		ImageColorScheme sc = new ImageColorScheme(channels, null);
 		sc.convertScheme(SCHEME_TYPE.YUV);
 		sc.convertScheme(SCHEME_TYPE.RGB);
 		sc.convertScheme(SCHEME_TYPE.YUV);
@@ -96,5 +113,4 @@ public class ColorScheme {
 		System.out.println(Arrays.toString(sc.getG()));
 		System.out.println(Arrays.toString(sc.getB()));
 	}
-
 }
