@@ -100,6 +100,13 @@ public class ImageColorScheme {
 		return displayImage;
 	}
 	
+	private boolean inRange(int index, int height, int width) {
+		if(index >= 0 && index < height * width) {
+			return true;
+		}
+		return false;
+	}
+	
 	public void prefilter(int channelIndex, int height, int width) {
 		int numPixels = channels[channelIndex].length;
 		double [] filteredChannel = new double[numPixels];
@@ -108,24 +115,44 @@ public class ImageColorScheme {
 		// use a convolutional kernel to compute prefiltered values.
 		for(int i = 0; i < numPixels; i++) {
 			boolean edgeChannel = false;
-			double channelValue = channels[channelIndex][i] * 1/2;
-			if (i - width >= 0) {
-				channelValue += channels[channelIndex][i - width] * 1/8;
+			double channelValue = channels[channelIndex][i] * 0.12;
+			if (inRange(i - width, height, width)) {
+				channelValue += channels[channelIndex][i - width] * 0.11;
 			} else {
 				edgeChannel = true;
 			}
-			if (i + width < numPixels) {
-				channelValue += channels[channelIndex][i + width] * 1/8;
+			if (inRange(i - width - 1, height, width)) {
+				channelValue += channels[channelIndex][i - width - 1] * 0.11;
 			} else {
 				edgeChannel = true;
 			}
-			if (i - 1 >= 0) {
-				channelValue += channels[channelIndex][i - 1] * 1/8;
+			if (inRange(i - width + 1, height, width)) {
+				channelValue += channels[channelIndex][i - width + 1] * 0.11;
 			} else {
 				edgeChannel = true;
 			}
-			if (i + 1 < numPixels) {
-				channelValue += channels[channelIndex][i + 1] * 1/8;
+			if (inRange(i + width, height, width)) {
+				channelValue += channels[channelIndex][i + width] * 0.11;
+			} else {
+				edgeChannel = true;
+			}
+			if (inRange(i + width - 1, height, width)) {
+				channelValue += channels[channelIndex][i + width - 1] * 0.11;
+			} else {
+				edgeChannel = true;
+			}
+			if (inRange(i + width + 1, height, width)) {
+				channelValue += channels[channelIndex][i + width + 1] * 0.11;
+			} else {
+				edgeChannel = true;
+			}
+			if (inRange(i - 1, height, width)) {
+				channelValue += channels[channelIndex][i - 1] * 0.11;
+			} else {
+				edgeChannel = true;
+			}
+			if (inRange(i + 1, height, width)) {
+				channelValue += channels[channelIndex][i + 1] * 0.11;
 			} else {
 				edgeChannel = true;
 			}
