@@ -60,9 +60,9 @@ public class ImageReader {
 					byte b = bytes[ind + height * width * 2];
 
 					if (withChannels) {
-						channels[0][ind] = (double) r;
-						channels[1][ind] = (double) g;
-						channels[2][ind] = (double) b;
+						channels[0][ind] = (double) (r & 0xff);
+						channels[1][ind] = (double) (g & 0xff);
+						channels[2][ind] = (double) (b & 0xff); //TODO How about just before displaying?
 						
 						//channels[1][ind + height * width] = (double) g;
 						//channels[2][ind + height * width * 2] = (double) b;
@@ -112,20 +112,42 @@ public class ImageReader {
 		// use pipeline for SubSampling, Quant to produce a final image.
 
 		inputImageScheme.getY(); //converts to YUV scheme
+		
+		// TODO prefiltering to reduce subsampling artifacts
+		/*
+		inputImageScheme.prefilter(0, height, width);
+		inputImageScheme.prefilter(1, height, width);
+		inputImageScheme.prefilter(2, height, width);
+		*/
+		
 		int subsampleY = Integer.parseInt(args[1]); // subsample + upsample in the Y channel
 		int subsampleU = Integer.parseInt(args[2]); // similarly subsample + upsample for other channels
 		int subsampleV = Integer.parseInt(args[3]);
 
 		new SubSampler().subsample(inputImageScheme, subsampleY, subsampleU, subsampleV);
 
-		inputImageScheme.getR(); //converts to RGB space
+		inputImageScheme.getR(); //converts to RGB space - (not necessary to call separately here - just for clarity)
 		
 		int quantLevel = Integer.parseInt(args[4]);
+
 		byte[] finalChannel = new RGBQuantizer().quantize(inputImageScheme, quantLevel);
 
 		// set display image for the output image scheme
 		BufferedImage afterImage = pixelsToImage(finalChannel, height, width);
 
+		double meanSquareError = 0;
+		for (int y = 0; y < height; y++) {
+			for (int x = 0; x < width; x++) {
+				int afterImageRgb = afterImage.getRGB(x, y);
+				int beforeImageRgb = beforeImage.getRGB(x, y);
+				if(x < 1 && afterImageRgb != beforeImageRgb) {
+					//System.out.println(afterImageRgb + " " + beforeImageRgb);
+				}
+				meanSquareError += Math.pow((double)afterImageRgb - (double)beforeImageRgb, 2);
+			}
+		}
+		System.out.println(meanSquareError); //TODO why such high value for 1 1 1 256
+		
 		// load a result image in second window, for final comparison.
 		lbIm2 = new JLabel(new ImageIcon(afterImage)); 
 

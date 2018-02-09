@@ -14,35 +14,33 @@ public class RGBQuantizer {
 		byte [] resultImage = new byte[totalBytes];
 		
 		// Quantize by channel
-		quantizeChannel(scheme.getR(), 0, compressionRatio, resultImage); //R channel quantization
-		quantizeChannel(scheme.getG(), height * width, compressionRatio, resultImage);
-		quantizeChannel(scheme.getB(), height * width * 2, compressionRatio, resultImage);
+		quantizeChannel(scheme.getR(), 0, compressionRatio, resultImage, q); //R channel quantization
+		quantizeChannel(scheme.getG(), height * width, compressionRatio, resultImage, q);
+		quantizeChannel(scheme.getB(), height * width * 2, compressionRatio, resultImage, q);
 		
 		return resultImage;
 	}
 	
-	private void quantizeChannel(double[] channel, int channelStartIndex, float compressionRatio, byte [] resultImage) {
+	public void quantizeChannel(double[] channel, int channelStartIndex, float compressionRatio, byte [] resultImage, int q) {
 
 		for(int i = 0; i < channel.length; i++) {
+			
+			/*
 			int intPrecisionSample;
 			
-			// TODO clamp down the values?
-			double sampleValue = channel[i];
-			if(sampleValue > 127) {
-				channel[i] = 127;
-			} else if (sampleValue < -128) {
-				channel[i] = -128;
-			}
-			
-			sampleValue = channel[i] / compressionRatio;
+			double sampleValue = (((byte) channel[i] & 0xff) + 1) / compressionRatio; 
 			double fractionalDiff = sampleValue - (long) sampleValue;
 			if(fractionalDiff < 0.5) {
 				intPrecisionSample = (int) Math.floor(sampleValue);
 			} else {
 				intPrecisionSample = (int) Math.ceil(sampleValue);
 			}
+			
+			resultImage[i + channelStartIndex] = (byte) Math.min(Math.max(0, intPrecisionSample - 1), q  - 1);
+			*/
 
-			resultImage[i + channelStartIndex] = (byte) intPrecisionSample;			
+			//resultImage[i + channelStartIndex] = (byte) quantizeValue((int)((byte)channel[i] & 0xff), q);
+			resultImage[i + channelStartIndex] = (byte) quantizeValue((byte)channel[i], q);
 		}
 	}
 
@@ -50,4 +48,16 @@ public class RGBQuantizer {
 		return (int) Math.pow(2, Math.ceil(Math.log(q)/Math.log(2)));
 	}
 
+	// quantize per channel's value (R/G/B)
+	private int quantizeValue(int input, int q) {
+		if (q < INITIAL_LEVELS_Q && q > 0) {
+			int compressionMultiplier = (256 / q);
+			if (input > (255 - compressionMultiplier)) {
+				return (255 - compressionMultiplier);
+			}
+			int qLevel = (int) Math.rint((input + 1.0) / compressionMultiplier);
+			return compressionMultiplier * qLevel - 1;
+		}
+		return input;
+	}
 }

@@ -30,7 +30,7 @@ public class SubSampler {
 				double neighborhoodAvg = getAverageNeighborhoodSample(channel, row, col, sampleRate, height, width);
 				for(int diff = 1; diff < Math.min(sampleRate, width - col); diff++) {
 					
-					//if(row * width + col + diff < height * width) { //TODO Check index bounds
+					//if(row * width + col + diff < height * width) {
 					
 					channel[row * width + col + diff] = neighborhoodAvg;
 					//channel[row * width + col + diff] = -1;

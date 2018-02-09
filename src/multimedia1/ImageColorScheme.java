@@ -28,8 +28,7 @@ public class ImageColorScheme {
 	}
 	
 	private SCHEME_TYPE type;
-	//TODO change to private
-	public double [][] channels;
+	private double [][] channels;
 	private BufferedImage displayImage;
 	
 	private Matrix rgbToYuvMatrix;
@@ -99,6 +98,49 @@ public class ImageColorScheme {
 
 	public BufferedImage getDisplayImage() {
 		return displayImage;
+	}
+	
+	public void prefilter(int channelIndex, int height, int width) {
+		int numPixels = channels[channelIndex].length;
+		double [] filteredChannel = new double[numPixels];
+		
+		int filtered = 0;
+		// use a convolutional kernel to compute prefiltered values.
+		for(int i = 0; i < numPixels; i++) {
+			boolean edgeChannel = false;
+			double channelValue = channels[channelIndex][i] * 1/2;
+			if (i - width >= 0) {
+				channelValue += channels[channelIndex][i - width] * 1/8;
+			} else {
+				edgeChannel = true;
+			}
+			if (i + width < numPixels) {
+				channelValue += channels[channelIndex][i + width] * 1/8;
+			} else {
+				edgeChannel = true;
+			}
+			if (i - 1 >= 0) {
+				channelValue += channels[channelIndex][i - 1] * 1/8;
+			} else {
+				edgeChannel = true;
+			}
+			if (i + 1 < numPixels) {
+				channelValue += channels[channelIndex][i + 1] * 1/8;
+			} else {
+				edgeChannel = true;
+			}
+			if (!edgeChannel) {
+				filteredChannel[i] = channelValue;
+			} else {
+				filteredChannel[i] = channels[channelIndex][i];
+				filtered++;
+			}
+		}
+		System.out.println(filtered + " number of pixels not prefiltered");
+		// Copy over the values of the prefiltered channel
+		for(int i = 0; i < numPixels; i++) {
+			channels[channelIndex][i] = filteredChannel[i];
+		}
 	}
 	
 	public static void main(String[] args) {
