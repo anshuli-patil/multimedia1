@@ -22,7 +22,7 @@ public class ImageColorScheme {
 		@SuppressWarnings("unused")
 		private int typeCode;
 
-		SCHEME_TYPE(int typeCode) {
+		SCHEME_TYPE(int typeCode) { 
 			this.typeCode = typeCode;
 		}
 	}
@@ -107,7 +107,7 @@ public class ImageColorScheme {
 		return false;
 	}
 	
-	public void prefilter(int channelIndex, int height, int width) {
+	public void prefilter(int channelIndex, int height, int width, int sampleRate) {
 		int numPixels = channels[channelIndex].length;
 		double [] filteredChannel = new double[numPixels];
 		
@@ -115,6 +115,12 @@ public class ImageColorScheme {
 		// use a convolutional kernel to compute prefiltered values.
 		for(int i = 0; i < numPixels; i++) {
 			boolean edgeChannel = false;
+			
+			// skip prefiltering for main samples
+			if(((i % width) + 1) % sampleRate == 0) {
+				edgeChannel = true;
+			}
+			
 			double channelValue = channels[channelIndex][i] * 0.12;
 			if (inRange(i - width, height, width)) {
 				channelValue += channels[channelIndex][i - width] * 0.11;

@@ -3,6 +3,7 @@ package multimedia1;
 public class RGBQuantizer {
 	
 	public static final int INITIAL_LEVELS_Q = 256;
+	private static final int MAX_COLOR_VAL = 255;
 	
 	public byte[] quantize(ImageColorScheme scheme, int q) {
 		int qLevels = powerOf2Ceil(q);
@@ -57,6 +58,11 @@ public class RGBQuantizer {
 			}
 			int qLevel = (int) Math.rint((input + 1.0) / compressionMultiplier);
 			return compressionMultiplier * qLevel - 1;
+		}
+		if (input < 0) {
+			input = 0;
+		} else if (input >= INITIAL_LEVELS_Q) {
+			input = MAX_COLOR_VAL;
 		}
 
 		return input;
