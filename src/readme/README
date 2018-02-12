@@ -1,9 +1,0 @@
-ImageReader is used to display the original image and the post-processing image, to offer a side by side comparison.
-To generate the processed image, call the highest level function in <TOP_LEVEL_CLASS> with the params in the following format -
-
-java <TOP_LEVEL_CLASS> <IMAGE_FILENAME>.rgb Y U V Q
-
-A file will be generated with the processed image, called <IMAGE_FILENAME>_after.rgb
-
-
-Assuming the height and width are fixed to 352, 288.
