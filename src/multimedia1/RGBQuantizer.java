@@ -41,7 +41,7 @@ public class RGBQuantizer {
 			*/
 
 			//resultImage[i + channelStartIndex] = (byte) quantizeValue((int)((byte)channel[i] & 0xff), q);
-			resultImage[i + channelStartIndex] = (byte) quantizeValue((int)Math.rint(channel[i]), q);
+			resultImage[i + channelStartIndex] = (byte) quantizeValue((int) Math.rint(channel[i]), q);
 		}
 	}
 
