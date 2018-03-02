@@ -5,6 +5,9 @@ ImageReader is used to display the original image and the post-processing image,
 To generate the processed image, call the highest level function in ImageReader class with the params in the following format -
 (Run from /src folder)
 
-java multimedia1.ImageReader <IMAGE_FILENAME>.rgb Y U V Q
+java multimedia1.ImageReader multimedia1/2018_Spring_Images/<IMAGE_FILENAME>.rgb Y U V Q
+
+For example, 
+java multimedia1.ImageReader multimedia1/2018_Spring_Images/Image1.rgb 1 1 1 256
 
 Assumption: height and width are fixed to 352, 288.

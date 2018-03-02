@@ -5,6 +5,10 @@ import java.awt.image.*;
 import java.io.*;
 import javax.swing.*;
 
+import multimedia1.ImageColorScheme;
+import multimedia1.RGBQuantizer;
+import multimedia1.SubSampler;
+
 public class ImageReader {
 
 	public static final int width = 352;
@@ -113,26 +117,31 @@ public class ImageReader {
 
 		inputImageScheme.getY(); //converts to YUV scheme
 		
-		// TODO prefiltering to reduce subsampling artifacts
-		/*
-		inputImageScheme.prefilter(0, height, width);
-		inputImageScheme.prefilter(1, height, width);
-		inputImageScheme.prefilter(2, height, width);
-		*/
-		
 		int subsampleY = Integer.parseInt(args[1]); // subsample + upsample in the Y channel
 		int subsampleU = Integer.parseInt(args[2]); // similarly subsample + upsample for other channels
 		int subsampleV = Integer.parseInt(args[3]);
-
+		
+		/*
+		// prefiltering to reduce subsampling artifacts
+		inputImageScheme.prefilter(0, height, width, subsampleY);
+		inputImageScheme.prefilter(1, height, width, subsampleU);
+		inputImageScheme.prefilter(2, height, width, subsampleV);
+		*/
+		
+		//TODO
 		new SubSampler().subsample(inputImageScheme, subsampleY, subsampleU, subsampleV);
-
+		//new SmoothSubSampler().subsample(inputImageScheme, subsampleY, subsampleU, subsampleV);
+		
 		inputImageScheme.getR(); //converts to RGB space - (not necessary to call separately here - just for clarity)
 		
 		int quantLevel = Integer.parseInt(args[4]);
 
+		//TODO
 		byte[] finalChannel = new RGBQuantizer().quantize(inputImageScheme, quantLevel);
-
-		// set display image for the output image scheme
+		//byte[] finalChannel = new AdvancedQuantizer().quantize(inputImageScheme, quantLevel);
+		//byte[] finalChannel = new QuantizerClustererApache().quantize(inputImageScheme, quantLevel);
+		
+ 		// set display image for the output image scheme
 		BufferedImage afterImage = pixelsToImage(finalChannel, height, width);
 
 		double meanSquareError = 0;
@@ -146,11 +155,12 @@ public class ImageReader {
 				meanSquareError += Math.pow((double)afterImageRgb - (double)beforeImageRgb, 2);
 			}
 		}
-		System.out.println(meanSquareError); //TODO why such high value for 1 1 1 256
+		//System.out.println(subsampleY + " " + meanSquareError);
 		
 		// load a result image in second window, for final comparison.
 		lbIm2 = new JLabel(new ImageIcon(afterImage)); 
 
+		
 		GridBagConstraints c = new GridBagConstraints();
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.anchor = GridBagConstraints.CENTER;
@@ -178,6 +188,7 @@ public class ImageReader {
 
 		frame.pack();
 		frame.setVisible(true);
+		
 	}
 	
 	private BufferedImage pixelsToImage(byte[] channels, int height, int width) {
